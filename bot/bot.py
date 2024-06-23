@@ -487,6 +487,7 @@ async def generate_image_handle(update: Update, context: CallbackContext, messag
 
     await update.message.chat.send_action(action="upload_photo")
     image_model = db.get_user_attribute(user_id, "current_image_model")
+    image_size = config.models["info"][image_model]["size"]
 
     if image_model is None:
         image_model = "stablediffusion"
@@ -497,7 +498,7 @@ async def generate_image_handle(update: Update, context: CallbackContext, messag
     message = message.replace("@" + context.bot.username, "").strip()
 
     try:
-        image_urls = await openai_utils.generate_images(message, n_images=config.return_n_generated_images, model=image_model)
+        image_urls = await openai_utils.generate_images(message, n_images=config.return_n_generated_images, model=image_model, size=image_size)
     except openai.error.InvalidRequestError as e:
         if str(e).startswith("Your request was rejected as a result of our safety system"):
             text = "🥲 Your request <b>doesn't comply</b> with OpenAI's usage policies.\nWhat did you write there, huh?"
